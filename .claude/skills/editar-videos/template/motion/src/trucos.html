@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .ov { top: 150px; padding: 34px 34px 30px; display: flex; flex-direction: column; gap: 16px; }
+  .hd { display: flex; align-items: baseline; gap: 16px; margin-bottom: 6px; }
+  .hd b { font-family: var(--font-display); font-weight: 800; font-size: 76px; letter-spacing: -3px; color: var(--sky); line-height: .9; }
+  .hd span { font-family: var(--font-display); font-weight: 700; font-size: 56px; letter-spacing: -2px; }
+  .it { position: relative; display: flex; align-items: center; gap: 22px; padding: 18px 20px; border-radius: 18px; background: color-mix(in srgb, var(--bg2) 87%, var(--card)); border: 2px solid var(--card2); }
+  .it .ct { flex: 1; }
+  .it .t { font-family: var(--font-display); font-weight: 700; font-size: 37px; letter-spacing: -1px; line-height: 1.12; }
+  .it .d { margin-top: 6px; font-size: 25px; color: var(--muted); }
+  .it .ico { flex: none; width: 54px; height: 54px; }
+  .it .knode { color: color-mix(in srgb, var(--dim) 29%, var(--line)); border-color: var(--line); background: color-mix(in srgb, var(--blue) 6%, var(--bg)); }
+  /* pending row: skeleton bars until its cue */
+  .sk { position: absolute; left: 106px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 14px; }
+  .sk i { display: block; height: 16px; border-radius: 8px; background: color-mix(in srgb, var(--line2) 61%, var(--bg)); }
+  @keyframes hiOn  { from { background: color-mix(in srgb, var(--bg2) 87%, var(--card)); border-color: var(--card2); } to { background: color-mix(in srgb, var(--b600) 24%, var(--bg)); border-color: var(--blue); } }
+  @keyframes hiOff { from { background: color-mix(in srgb, var(--b600) 24%, var(--bg)); border-color: var(--blue); } to { background: color-mix(in srgb, var(--card2) 68%, var(--bg)); border-color: color-mix(in srgb, var(--line2) 61%, var(--bg)); } }
+  @keyframes bumpN { 0%, 100% { transform: none; } 50% { transform: scale(1.16); } }
+  @keyframes nodeOn { from { background: color-mix(in srgb, var(--blue) 6%, var(--bg)); color: color-mix(in srgb, var(--dim) 29%, var(--line)); border-color: var(--line); } to { background: var(--blue); color: #fff; border-color: var(--sky); } }
+</style></head>
+<body>
+<div class="ov" id="ov"><div class="hd"><b id="num"></b><span id="hd"></span></div></div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // A short list that fills in on cue: the rows wait as placeholders and the newest one is highlighted.
+  // items = "Título|detalle;Título|detalle;..." (1-4 rows) · h = word after the count (default «claves») · d = clip duration
+  // cues: 0..n-1 = row 1..n
+  const I = str('items', 'Primera idea|Una línea que la explica;Segunda idea|Una línea que la explica;Tercera idea|Una línea que la explica')
+    .split(';').filter((x) => x.trim()).slice(0, 4).map((x) => x.split('|'));
+  const n = I.length, dur = num('d', 8), c = I.map((_, k) => cue(k, 0.4 + k * 2.2));
+  $('num').textContent = n; $('hd').innerHTML = rich(str('h', 'claves'));
+  const ICO = '<svg class="ico" viewBox="0 0 48 48" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--sky)"><circle cx="24" cy="24" r="19"/><path d="M15 24.5l6 6 12-13"/></svg>';
+  I.forEach(([t, d], k) => {
+    const row = document.createElement('div');
+    row.className = 'it';
+    row.innerHTML = `<span class="knode">${k + 1}</span><div class="ct"><p class="t">${rich(t)}</p>${d ? `<p class="d">${rich(d)}</p>` : ''}</div>${ICO}`
+      + `<div class="sk"><i style="width: ${280 + (k % 2) * 50}px"></i><i style="width: ${160 + (k % 3) * 30}px"></i></div>`;
+    $('ov').appendChild(row);
+    const off = k < n - 1 ? `, hiOff .3s ${c[k + 1]}s forwards` : '';
+    anim(row, `hiOn .3s ${c[k]}s both${off}`);
+    anim(row.querySelector('.knode'), `nodeOn .3s ${c[k]}s both, bumpN .45s ${c[k]}s var(--ease)`);
+    anim(row.querySelector('.ct'), `slideR .45s ${c[k]}s both var(--ease)`);
+    anim(row.querySelector('.ico'), `popS .4s ${c[k] + 0.15}s both var(--ease)`);
+    anim(row.querySelector('.sk'), `fadeout .2s ${c[k]}s forwards`);
+  });
+  anim($('ov'), `slideR .5s -.1s both var(--ease), fadeout .35s ${dur - 0.4}s forwards`);
+})();
+</script>
+</body></html>

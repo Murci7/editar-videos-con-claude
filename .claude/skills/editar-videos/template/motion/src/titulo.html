@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  body.opaque { background: radial-gradient(circle at 82% 18%, var(--deep) 0%, var(--bg) 58%); }
+  .wrap { position: absolute; left: 128px; right: 128px; bottom: 200px; display: flex; flex-direction: column; gap: 28px; }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: 142px; line-height: 1; letter-spacing: -6px; }
+  h1 span { color: var(--sky); }
+  .sub { font-size: 46px; color: var(--muted); }
+  .logo { position: absolute; left: 128px; top: 110px; }
+  .logo img { width: 64px; height: 64px; } .logo span { font-size: 52px; }
+  .tl { position: absolute; left: 1150px; top: 120px; width: 640px; display: flex; flex-direction: column; gap: 14px; opacity: .9; }
+  .tl .tr { position: relative; height: 34px; }
+  .tl b { position: absolute; top: 0; height: 34px; border-radius: 8px; }
+  .tl .ph { position: absolute; top: -10px; width: 3px; height: 162px; background: var(--text); border-radius: 2px; box-shadow: 0 0 12px rgba(255,255,255,.6); }
+</style></head>
+<body>
+<div class="logo" style="animation: fadein .5s -.2s both"><img id="logo" alt=""><span id="mk"></span></div>
+<div class="tl" id="tl" style="display: none">
+  <div class="tr"><b style="left: 6%; width: 22%; background: var(--sky)"></b><b style="left: 52%; width: 16%; background: var(--sky)"></b><b style="left: 80%; width: 14%; background: var(--sky)"></b></div>
+  <div class="tr"><b style="left: 0; width: 34%; background: var(--blue)"></b><b style="left: 35%; width: 24%; background: var(--blue)"></b><b style="left: 60%; width: 40%; background: var(--blue)"></b></div>
+  <div class="tr"><b style="left: 0; width: 100%; background: var(--deep)"></b></div>
+  <span class="ph" id="ph"></span>
+</div>
+<div class="wrap">
+  <p class="eyebrow" id="eb" style="animation: fadein .5s -.1s both"></p>
+  <h1 id="h1" style="animation: rise .8s -.1s both var(--ease)"></h1>
+  <p class="sub" id="sub" style="animation: fadein .6s .5s both"></p>
+</div>
+<script src="marca.js"></script>
+<script src="base.js"></script>
+<script>
+(() => {
+  // Title card (full screen, TITLE_DUR). t = title (*word* = accent, | = line break) · eyebrow · sub (both optional)
+  // tl=1 adds a small animated timeline top right (fits videos about editing)
+  $('h1').innerHTML = rich(str('t', 'El título|de tu *vídeo*'));
+  $('logo').src = MARCA.logo; $('mk').textContent = MARCA.marca;
+  $('eb').textContent = str('eyebrow', ''); $('sub').innerHTML = rich(str('sub', ''));
+  const h1 = $('h1');
+  const fit = () => { let fs = 142; h1.style.fontSize = fs + 'px';   // shrink until it fits in 3 lines
+    while (fs > 80 && h1.offsetHeight > fs * 3.05) { fs -= 6; h1.style.fontSize = fs + 'px'; } };
+  fit(); document.fonts.ready.then(fit);
+  if (params.get('tl') === '1') {
+    $('tl').style.display = 'flex';
+    [...$('tl').querySelectorAll('b')].forEach((b, i) => { b.style.transformOrigin = '0 50%'; anim(b, `growX .45s ${0.15 + i * 0.08}s both var(--ease)`); });
+    tick((t) => { $('ph').style.left = (640 * prog(t, 0.3, 2.4)) + 'px'; });
+  }
+})();
+</script>
+</body></html>

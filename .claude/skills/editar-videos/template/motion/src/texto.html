@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .card { position: absolute; left: 110px; top: 330px; width: 680px; background: color-mix(in srgb, var(--bg) 94%, transparent); border: 1px solid var(--line);
+    border-radius: 28px; padding: 42px 46px; box-shadow: 0 24px 70px rgba(0,0,0,.45); }
+  .k { display: flex; flex-wrap: wrap; gap: 0 22px; font-family: var(--font-display); font-weight: 800; font-size: 88px;
+    line-height: 1.05; letter-spacing: -3px; text-transform: uppercase; color: var(--text); }
+  .k span { display: inline-block; }
+  .k .hl { color: var(--sky); } .k .wr { color: var(--orange); }
+</style></head>
+<body>
+<div class="card" id="card"><p class="k" id="k"></p></div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // txt = the text: words split by spaces, *words* = accent, !words! = orange (warnings only) · d = clip duration
+  // Words pop in one after another; long phrases shrink to fit the card (max 3 lines).
+  const src = str('txt', 'Una idea *clave*'), dur = num('d', 2.8);
+  const k = $('k');
+  // markers may span several words: «*se automatiza*» colours both words
+  let mode = '';
+  src.split(' ').forEach((w, i) => {
+    const s = document.createElement('span');
+    if (w.startsWith('*')) { mode = 'hl'; w = w.slice(1); } else if (w.startsWith('!')) { mode = 'wr'; w = w.slice(1); }
+    let cls = mode;
+    if (mode && /[*!]$/.test(w)) { w = w.slice(0, -1); mode = ''; }
+    s.textContent = w;
+    if (cls) s.className = cls;
+    s.style.animation = `pop .35s ${0.12 + i * 0.13}s both var(--ease)`;
+    k.appendChild(s);
+  });
+  // shrink until every word fits on the card and the text stays within 3 lines
+  const fit = () => {
+    let fs = 88;
+    k.style.fontSize = fs + 'px';
+    while (fs > 44 && (k.scrollWidth > k.clientWidth + 1 || [...k.children].some((s) => s.offsetWidth > k.clientWidth) || k.offsetHeight > fs * 1.05 * 3 + 4)) {
+      fs -= 4; k.style.fontSize = fs + 'px'; k.style.letterSpacing = (-fs / 30) + 'px';
+    }
+  };
+  fit(); document.fonts.ready.then(fit);
+  anim($('card'), `slideR .45s -.1s both var(--ease), fadeout .3s ${dur - 0.35}s forwards`);
+})();
+</script>
+</body></html>

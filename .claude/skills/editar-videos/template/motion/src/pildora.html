@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .pl { position: absolute; left: 110px; top: 120px; display: flex; align-items: center; gap: 18px; padding: 12px 32px 12px 12px;
+    border-radius: 999px; background: color-mix(in srgb, var(--bg) 95%, transparent); border: 1.5px solid color-mix(in srgb, var(--sky) 50%, transparent); overflow: hidden;
+    box-shadow: 0 22px 60px rgba(0,0,0,.45), 0 0 0 7px color-mix(in srgb, var(--sky) 9%, transparent); }
+  .bolt { flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(140deg, var(--sky), var(--b600)); box-shadow: 0 0 26px color-mix(in srgb, var(--sky) 55%, transparent); }
+  .bolt svg { width: 34px; height: 34px; }
+  .tx { font-family: var(--font-display); font-weight: 600; font-size: 34px; letter-spacing: -.5px; white-space: nowrap; color: var(--text); }
+  .n { font-family: var(--font-mono); font-weight: 700; color: var(--sky); font-variant-numeric: tabular-nums;
+    display: inline-block; text-align: right; margin-right: 6px; }
+  .sh { position: absolute; top: -10px; bottom: -10px; left: 0; width: 90px; opacity: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent); }
+  @keyframes flash { 0% { color: #fff; text-shadow: 0 0 22px color-mix(in srgb, var(--sky) 90%, transparent); } 100% { color: var(--sky); text-shadow: none; } }
+  @keyframes shOn { 0%, 100% { opacity: 1; } }
+  @keyframes bump { 0%, 100% { transform: none; } 40% { transform: scale(1.22) rotate(-8deg); } }
+</style></head>
+<body>
+<div class="pl" id="pl">
+  <span class="bolt" id="bolt"><svg viewBox="0 0 24 24"><path d="M13.6 1.8 4.2 13.4h6.3l-1.2 8.8 9.6-12.1h-6.4l1.1-8.3Z" style="fill: var(--bg)"/></svg></span>
+  <p class="tx"><span class="n" id="n">0</span> <span id="lbl"></span></p>
+  <span class="sh" id="sh"></span>
+</div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // n = the real number of edits counted from the montage (work/capcut_stats.json) · t = label · d = clip duration
+  // cues: 0 = pill in (the count runs right after it)
+  const N = Math.round(num('n', 186)), dur = num('d', 5), c0 = cue(0, 0.15);
+  const fmt = (v) => v.toLocaleString('es-ES');
+  $('lbl').innerHTML = rich(str('t', 'ediciones hechas por Claude'));
+  const el = $('n'), t0 = c0 + 0.3, T = 1.5;
+  el.style.minWidth = fmt(N).length + 'ch';
+  tick((t) => { el.textContent = fmt(Math.round(N * easeOut(prog(t, t0, T)))); });
+  anim($('pl'), `slideR .5s ${c0 - 0.12}s both var(--ease), fadeout .35s ${dur - 0.4}s forwards`);
+  anim(el, `flash .7s ${t0 + T}s both`);
+  anim($('bolt'), `bump .55s ${t0 + T - 0.05}s both var(--ease)`);
+  anim($('sh'), `shimmer .9s ${t0 + T}s both ease-out, shOn .9s ${t0 + T}s`);
+})();
+</script>
+</body></html>

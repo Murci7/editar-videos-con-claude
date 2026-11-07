@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  /* Sequential before/after overlay. Under it (pantalla.py, kind antes2): ONE window x=320 y=128 w=1280 h=720 r=18 that
+     plays the raw take (desaturated) and, after the switch (cue 1), the same take cut by Claude.
+     a = raw seconds · b = cut seconds · sp = speech spans of the raw take "s-e,s-e,…" (everything else = silence) */
+  #frame { position: absolute; left: 0; top: 0; }
+  .lbl { position: absolute; left: 320px; top: 50px; display: flex; align-items: center; gap: 18px; white-space: nowrap; }
+  .lbl .k { font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 30px; letter-spacing: 3px; padding: 9px 22px; border-radius: 999px; }
+  .lbl .s { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 42px; letter-spacing: -1px; }
+  #la .k { color: #FEE2E2; background: rgba(239,68,68,.22); border: 1px solid rgba(239,68,68,.6); } #la .s { color: var(--muted); }
+  #lb .k { color: var(--bg); background: var(--sky); } #lb .s { color: var(--text); }
+  .hud { position: absolute; left: 348px; top: 152px; display: flex; align-items: center; gap: 14px; padding: 8px 18px; border-radius: 12px;
+    background: rgba(7,11,20,.72); font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 26px; letter-spacing: 1px; }
+  #ha { color: #F1F5FB; } #ha i { width: 18px; height: 18px; border-radius: 50%; background: #EF4444; box-shadow: 0 0 12px #EF4444; display: block; }
+  #ha span { color: var(--muted); font-weight: 600; }
+  #hb { color: var(--bg); background: var(--sky); }
+  .bar { position: absolute; left: 320px; top: 884px; width: 1280px; height: 46px; }
+  .bar .sp { position: absolute; top: 0; height: 46px; border-radius: 6px; background: linear-gradient(180deg, var(--blue), var(--b600)); }
+  .bar .si { position: absolute; top: 0; height: 46px; border-radius: 6px;
+    background: repeating-linear-gradient(135deg, rgba(239,68,68,.85) 0 10px, rgba(239,68,68,.55) 10px 20px); }
+  .bar .sl { position: absolute; top: -40px; transform: translateX(-50%); font-family: 'Geist Mono', monospace; font-weight: 700; font-size: 22px;
+    color: #FCA5A5; white-space: nowrap; }
+  .ph { position: absolute; top: 872px; width: 4px; height: 70px; border-radius: 2px; background: #F1F5FB; box-shadow: 0 0 10px rgba(255,255,255,.7); }
+  .tot { position: absolute; top: 884px; height: 46px; display: flex; align-items: center; gap: 14px; font-family: 'Geist Mono', monospace;
+    font-weight: 700; font-size: 34px; white-space: nowrap; }
+  .tot .pc { color: var(--bg); background: var(--sky); border-radius: 999px; padding: 2px 14px; font-size: 28px; }
+  .tag { display: none; position: absolute; top: 66px; right: 320px; font-family: 'Geist Mono', monospace; font-size: 20px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
+</style></head>
+<body>
+<svg id="frame" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: color-mix(in srgb, var(--deep) 24%, var(--card))"/><stop offset=".55" style="stop-color: var(--bg)"/><stop offset="1" style="stop-color: var(--bg)"/></linearGradient>
+    <pattern id="dots" width="44" height="44" patternUnits="userSpaceOnUse"><circle cx="22" cy="22" r="1.5" fill="#A9B8CF" fill-opacity=".1"/></pattern>
+  </defs>
+  <path id="mask" fill-rule="evenodd" fill="url(#gl)"/>
+  <path id="mask2" fill-rule="evenodd" fill="url(#dots)"/>
+  <rect id="bd" x="317" y="125" width="1286" height="726" rx="21" fill="none" stroke="#EF4444" stroke-opacity=".7" stroke-width="3"/>
+</svg>
+<div class="lbl" id="la"><span class="k">ANTES</span><span class="s">tal cual sale de la cámara</span></div>
+<div class="lbl" id="lb"><span class="k">DESPUÉS</span><span class="s">montado por Claude</span></div>
+<div class="hud" id="ha"><i id="dot"></i>REC <span id="ta">0:00,0</span> <span>· sin editar</span></div>
+<div class="hud" id="hb">✓ sin silencios · con zoom</div>
+<div class="bar" id="bar"></div>
+<span class="ph" id="ph"></span>
+<div class="tot" id="tot"><span id="tt"></span><span class="pc" id="pc"></span></div>
+<p class="tag" id="tag">la toma entera · azul = voz · rojo = silencio</p>
+<script src="base.js"></script>
+<script>
+(() => {
+  const A = num('a', 19.8), B = num('b', 14.6);
+  const SP = str('sp', '2.03-5.6,5.77-8.03,8.43-13.23,13.4-16.6').split(',').map((s) => s.split('-').map(Number));
+  const c0 = cue(0, 0.4), c1 = cue(1, 6.4), W = 1280, X0 = 320;
+  const rr = (x, y, w, h, r) => `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}`
+    + `H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
+  const d = 'M0 0H1920V1080H0Z' + rr(320, 128, 1280, 720, 18);
+  ['mask', 'mask2'].forEach((id) => $(id).setAttribute('d', d));
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')},${Math.floor((s * 10) % 10)}`;
+  const f1 = (s) => s.toFixed(1).replace('.', ',');
+  // blocks: speech (kept) and silence (removed), in raw time; cut position = sum of the speech before it
+  const bar = $('bar'), blocks = []; let prev = 0, acc = 0;
+  const add = (cls, a, b, ca) => { const el = document.createElement('span'); el.className = cls; bar.appendChild(el);
+    blocks.push({ el, a, b, ca, cls }); return el; };
+  SP.forEach(([a, b]) => {
+    if (a - prev > 0.05) {
+      add('si', prev, a, acc);
+      if (a - prev >= 0.35) { const l = document.createElement('span'); l.className = 'sl'; l.textContent = f1(a - prev) + ' s';
+        l.dataset.x = (prev + a) / 2; bar.appendChild(l); }
+    }
+    add('sp', a, b, acc); acc += b - a; prev = b;
+  });
+  if (A - prev > 0.05) { add('si', prev, A, acc); const l = document.createElement('span'); l.className = 'sl';
+    l.textContent = f1(A - prev) + ' s'; l.dataset.x = (prev + A) / 2; bar.appendChild(l); }
+  const pct = Math.round((1 - B / A) * 100);
+  $('pc').textContent = `−${pct} %`;
+  tick((t) => {
+    const u = easeOut(prog(t, c1 + 0.25, 0.9));           // 0 = raw layout · 1 = cut layout (silences closed)
+    blocks.forEach(({ el, a, b, ca, cls }) => {
+      const xr = a / A * W, wr = (b - a) / A * W, xc = ca / A * W;
+      const x = xr + (xc - xr) * u, w = cls === 'si' ? wr * (1 - u) : wr;
+      el.style.left = x + 'px'; el.style.width = Math.max(0, w - 2) + 'px'; el.style.opacity = cls === 'si' ? 1 - u * 0.9 : 1;
+    });
+    bar.querySelectorAll('.sl').forEach((l) => { l.style.left = (l.dataset.x / A * W) + 'px'; l.style.opacity = 1 - u; });
+    // raw timer + playhead while the raw take plays; total at the end of the bar
+    const rt = Math.max(0, Math.min(A, t - c0));
+    $('ta').textContent = fmt(rt);
+    const phx = t < c1 ? X0 + rt / A * W : X0 + (B / A * W) * prog(t, c1 + 0.3, Math.max(0.5, B));
+    $('ph').style.left = (phx - 2) + 'px'; $('ph').style.opacity = t < c1 - 0.1 || t > c1 + 1.2 ? 1 : 0;
+    const L = W * (1 - (1 - B / A) * u);
+    $('tot').style.left = (X0 + Math.min(W, L) + (u > 0 ? 24 : -9999)) + 'px';
+    $('tt').innerHTML = `<span style="color:#7E8DA8;text-decoration:line-through">${f1(A)} s</span> ${f1(B)} s`;
+    $('dot').style.opacity = Math.floor(t * 2) % 2 ? 0.25 : 1;
+    $('bd').setAttribute('stroke', t < c1 ? '#EF4444' : '#38BDF8');
+  });
+  anim($('la'), `slideR .45s ${c0 - 0.3}s both var(--ease)`);
+  anim($('ha'), `fadein .3s ${c0}s both`);
+  anim($('bar'), `riseS .5s ${c0}s both var(--ease)`);
+  anim($('tag'), `fadein .4s ${c0 + 0.3}s both`);
+  // switch: ANTES out, DESPUÉS in
+  $('la').style.animation += `, fadeout .25s ${c1}s forwards`;
+  $('ha').style.animation += `, fadeout .25s ${c1}s forwards`;
+  anim($('lb'), `slideR .45s ${c1 + 0.05}s both var(--ease)`);
+  anim($('hb'), `popS .4s ${c1 + 0.15}s both var(--ease)`);
+  anim($('tot'), `fadein .35s ${c1 + 0.9}s both`);
+})();
+</script>
+</body></html>

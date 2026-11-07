@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .pp { position: absolute; display: flex; align-items: center; gap: 14px; }
+  .pp .ar { width: 46px; height: 24px; flex: none; }
+  .pp .pl { display: flex; align-items: center; gap: 16px; padding: 10px 30px 10px 10px; border-radius: 999px;
+    background: color-mix(in srgb, var(--bg) 95%, transparent); border: 1.5px solid color-mix(in srgb, var(--sky) 45%, transparent); box-shadow: 0 16px 44px rgba(0,0,0,.45); }
+  .pp .ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--sky) 14%, transparent); flex: none; }
+  .pp .ic svg { width: 30px; height: 30px; }
+  .pp .t { font-family: var(--font-display); font-weight: 600; font-size: 36px; letter-spacing: -.6px; white-space: nowrap; }
+  @keyframes arIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+</style></head>
+<body>
+<div id="all"></div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // Callouts for the CapCut timeline on screen. Each pill has a small arrow on its left that points at the track.
+  // x = left edge of the arrows (px) · ys = y of each pill centre, comma-separated (align them to the tracks) ·
+  // n = how many pills (1-5, in this order) · d = clip duration (all fade out at the end)
+  // cues: 0 Tomas · 1 Gráficos · 2 Subtítulos · 3 Sonidos · 4 Música
+  const I = {
+    film: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 5v14M17 5v14M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/>',
+    shapes: '<rect x="3" y="3" width="8" height="8" rx="2"/><circle cx="17" cy="7" r="4"/><path d="M7 14l4.5 7h-9L7 14Z"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    text: '<rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M7 15h5M14 15h3M7 11h10"/>',
+    wave: '<path d="M3 12v0M6 9v6M9 6v12M12 10v4M15 4v16M18 8v8M21 11v2"/>',
+    note: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>' };
+  const P = [['Tomas', 'film'], ['Gráficos', 'shapes'], ['Subtítulos', 'text'], ['Sonidos', 'wave'], ['Música', 'note']];
+  const n = Math.max(1, Math.min(5, Math.round(num('n', 5)))), dur = num('d', 6), x = num('x', 110);
+  const ys = str('ys', '').split(',').filter((s) => s !== '').map(Number);
+  P.slice(0, n).forEach(([t, ic], k) => {
+    const y = ys[k] !== undefined ? ys[k] : 300 + k * 116;
+    const el = document.createElement('div'); el.className = 'pp';
+    el.style.left = x + 'px'; el.style.top = (y - 37) + 'px';
+    el.innerHTML = `<svg class="ar" viewBox="0 0 46 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--sky)"><path d="M44 12H5M13 3 4 12l9 9"/></svg>
+      <span class="pl"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--sky)">${I[ic]}</svg></span><span class="t">${t}</span></span>`;
+    $('all').appendChild(el);
+    // entries start a touch before each cue, so frame 0 already shows the first pill
+    const c = cue(k, k * 0.8) - 0.1;
+    anim(el.querySelector('.pl'), `slideL .45s ${c}s both var(--ease)`);
+    anim(el.querySelector('.ar'), `arIn .4s ${c + 0.15}s both var(--ease)`);
+  });
+  anim($('all'), `fadeout .35s ${dur - 0.4}s forwards`);
+})();
+</script>
+</body></html>

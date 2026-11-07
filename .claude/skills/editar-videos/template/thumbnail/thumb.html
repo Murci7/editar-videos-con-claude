@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- 1280x720 thumbnail. Colours and fonts: ../motion/src/marca.css · logo and brand name: ../motion/src/marca.js.
+     Per video: paste caras/faces.json into FACES (tools/prep_face.py writes it) and edit PILL and TXT.
+     Render: thumb.html?f=<face key>&t=<text key>[&cx=975&cy=335&fh=262]  (cx/cy = face centre, fh = face height) -->
+<html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../motion/src/marca.css">
+<script src="../motion/src/marca.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: var(--bg); font-family: var(--font-display); }
+  .bg { position: absolute; inset: 0; background: radial-gradient(circle at 22% 30%, var(--deep) 0%, color-mix(in srgb, var(--deep) 22%, var(--bg)) 40%, var(--bg) 72%); }
+  .halo { position: absolute; width: 760px; height: 760px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--b600) 38%, transparent) 0%, color-mix(in srgb, var(--deep) 18%, transparent) 38%, transparent 68%); }
+  .grid { position: absolute; inset: 0; opacity: .14;
+    background-image: linear-gradient(var(--sky) 1px, transparent 1px), linear-gradient(90deg, var(--sky) 1px, transparent 1px); background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(circle at 70% 45%, #000 0%, transparent 60%); }
+  .person { position: absolute; filter: drop-shadow(0 30px 60px rgba(0,0,0,.55)); }
+  .logo { position: absolute; left: 56px; top: 44px; display: flex; align-items: center; gap: 12px; color: var(--text); font-weight: 500; font-size: 34px; letter-spacing: -1px; }
+  .logo img { width: 38px; height: 38px; }
+  .pill { position: absolute; left: 56px; top: 150px; display: flex; align-items: center; gap: 16px; }
+  .pill span { font-family: var(--font-mono); font-weight: 700; font-size: 34px; letter-spacing: 4px; background: var(--sky); color: var(--bg); padding: 6px 18px; border-radius: 10px; }
+  .stack { display: flex; flex-direction: column; gap: 4px; }
+  .stack i { display: block; width: 60px; height: 10px; border-radius: 3px; }
+  h1 { position: absolute; left: 52px; top: 225px; width: 700px; font-weight: 900; font-size: 112px; line-height: .98; letter-spacing: -4px;
+    text-transform: uppercase; color: var(--text); text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+  h1 b { color: var(--sky); font-weight: 900; }
+  .sub { position: absolute; left: 56px; bottom: 56px; font-weight: 700; font-size: 34px; color: var(--muted); }
+  .sub b { color: var(--text); }
+</style></head>
+<body>
+<div class="bg"></div><div class="grid"></div><div class="halo" id="halo"></div>
+<img class="person" id="p" alt=""><div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to top,var(--bg) 15%,transparent)"></div>
+<div id="ui"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const face = q.get('f') || 'a', txt = q.get('t') || 'a';
+  const LOGO = `<img src="../motion/src/${MARCA.logo}" alt="">`;
+  const STACK = '<div class="stack"><i style="background:var(--sky)"></i><i style="background:var(--blue)"></i><i style="background:var(--b600)"></i><i style="background:var(--deep)"></i></div>';
+  // face boxes from caras/faces.json (W = source image width); this one is only a placeholder
+  const FACES = {"a": {"cx": 560, "cy": 560, "w": 560, "h": 560, "W": 1120}};
+  // per video: pill label, then [headline, sub] per text variant (≤5 words in the headline, <b> = accent colour)
+  const PILL = 'TUTORIAL';
+  const TXT = {
+    a: ['Edita tu<br>vídeo<br><b>sin editar</b>', 'Con <b>Claude</b> y <b>CapCut</b>'],
+    b: ['Tu vídeo,<br>montado<br><b>solo</b>', '<b>Tomas</b> dentro · <b>vídeo</b> fuera'],
+  }[txt];
+  const FC = FACES[face];
+  const p = document.getElementById('p'), halo = document.getElementById('halo');
+  p.src = `caras/cara-${face}.png`;
+  const cx = Number(q.get('cx') || 975), cy = Number(q.get('cy') || 335), fh = Number(q.get('fh') || 262);
+  const s = fh / FC.h;
+  p.style.width = `${(FC.W || 1920) * s}px`; p.style.left = `${cx - FC.cx * s}px`; p.style.top = `${cy - FC.cy * s}px`;
+  halo.style.left = `${cx - 380}px`; halo.style.top = `${cy - 330}px`;
+  document.getElementById('ui').innerHTML = `<div class="logo">${LOGO}${MARCA.marca}</div><div class="pill">${STACK}<span>${PILL}</span></div>
+    <h1>${TXT[0]}</h1><p class="sub">${TXT[1]}</p>`;
+</script>
+</body></html>

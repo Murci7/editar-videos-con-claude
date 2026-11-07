@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  /* The REAL CapCut project (capcut-data.js, exported from the draft by edit/capcut_data.py) drawn as a clean CapCut-style
+     timeline. ?mode=flat (default) | 3d · ?head=1 shows «Claude ⋯⋯ CapCut» above · ?t0= timeline start (s)
+     ?x= timeline seconds per real second · ?pps= pixels per timeline second · cues 0-3: ✓ on Tomas, Gráficos,
+     Subtítulos, Efectos (the words in take 11) */
+  body { background: transparent; }
+  .scene { position: absolute; inset: 0; }
+  .panel { position: absolute; left: 110px; width: 1700px; border-radius: 22px; background: #161616; border: 1px solid #2C2C2C;
+    box-shadow: 0 40px 90px rgba(0,0,0,.6); overflow: hidden; font-family: 'Inter', sans-serif; }
+  .top { height: 66px; display: flex; align-items: center; gap: 16px; padding: 0 26px; border-bottom: 1px solid #262626; }
+  .top img { width: 34px; height: 34px; border-radius: 8px; }
+  .top b { font-size: 25px; font-weight: 600; color: #E9E9E9; }
+  .top .tc { margin-left: auto; font: 600 24px 'Geist Mono', monospace; color: #9A9A9A; }
+  .top .tc em { color: #F1F1F1; font-style: normal; }
+  .body { position: relative; display: grid; grid-template-columns: 250px 1fr; }
+  .labels { border-right: 1px solid #262626; padding-top: 52px; }
+  .lab { height: var(--rh); display: flex; align-items: center; gap: 14px; padding-left: 26px; color: #CFCFCF; font-size: 24px; position: relative; }
+  .lab .ic { width: 38px; text-align: center; color: #8F8F8F; font: 600 22px 'Geist Mono', monospace; }
+  .lab .ok { position: absolute; right: 20px; width: 34px; height: 34px; border-radius: 50%; background: #D97757; color: #fff;
+    display: grid; place-items: center; font-weight: 800; font-size: 20px; opacity: 0; }
+  .view { position: relative; overflow: hidden; height: 100%; }
+  .ruler { position: absolute; left: 0; top: 0; height: 52px; }
+  .tick { position: absolute; top: 30px; width: 1px; height: 12px; background: #4A4A4A; }
+  .tick.big { top: 22px; height: 20px; background: #6A6A6A; }
+  .tick span { position: absolute; top: -24px; left: 6px; font: 500 17px 'Geist Mono', monospace; color: #8A8A8A; white-space: nowrap; }
+  .rows { position: absolute; left: 0; top: 52px; }
+  .row { position: absolute; left: 0; height: calc(var(--rh) - 10px); }
+  .clip { position: absolute; top: 0; height: 100%; border-radius: 7px; overflow: hidden; white-space: nowrap; font-size: 17px; }
+  .clip span { position: absolute; left: 8px; top: 6px; right: 6px; overflow: hidden; text-overflow: ellipsis; }
+  .cap { background: #7A3E28; color: #F3D2C4; border: 1px solid #A0563A; }
+  .cap span { top: 50%; transform: translateY(-50%); }
+  .gfx { background: #5B3E9E; color: #E6DCFF; border: 1px solid #7C5CC9; }
+  .scr { background: #136F78; color: #D4F6F8; border: 1px solid #1C929D; }
+  .tom { background: #0F5E63; border: 1px solid #178A90; }
+  .tom .th { position: absolute; left: 0; right: 0; bottom: 0; top: 28px; background-size: auto 100%; background-repeat: repeat-x; }
+  .tom span { top: 4px; font: 500 15px 'Geist Mono', monospace; color: #D4F6F8; }
+  .sfx { background: #23324E; color: #B8C7E6; border: 1px solid #34486F; font-size: 15px; }
+  .wave { position: absolute; top: 0; height: 100%; background: #14294D; border-radius: 7px; border: 1px solid #1E3C70; overflow: hidden; }
+  .wave i { position: absolute; bottom: 50%; width: 3px; background: #4C8DF6; border-radius: 1px; transform: translateY(50%); }
+  .mus { position: absolute; top: 0; height: 100%; background: #1B2338; border-radius: 7px; border: 1px solid #2B3657; overflow: hidden; }
+  .mus i { position: absolute; bottom: 50%; width: 3px; background: #6E7FA8; transform: translateY(50%); }
+  .ph { position: absolute; top: 0; bottom: 0; width: 3px; background: #F5F5F5; box-shadow: 0 0 8px rgba(255,255,255,.6); }
+  .ph::before { content: ''; position: absolute; top: 2px; left: -9px; width: 21px; height: 24px; border-radius: 5px 5px 50% 50%; background: #F5F5F5; }
+  .row.hl::after { content: ''; position: absolute; left: -4000px; right: -4000px; top: -5px; bottom: -5px; background: rgba(217,119,87,.10); }
+  /* header: Claude ⋯⋯ CapCut */
+  .head2 { position: absolute; left: 0; right: 0; top: 54px; display: flex; justify-content: center; align-items: center; gap: 46px; }
+  .head2 .app { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .head2 img { width: 120px; height: 120px; filter: drop-shadow(0 14px 26px rgba(0,0,0,.6)); }
+  .head2 .app b { font: 600 26px 'Geist', sans-serif; color: #E9E9E9; }
+  .dots { width: 420px; height: 6px; position: relative; top: -20px; background-image: radial-gradient(circle, #D97757 2.6px, transparent 3px);
+    background-size: 22px 6px; }
+  /* 3D */
+  .persp { position: absolute; inset: 0; perspective: 1700px; perspective-origin: 50% 40%; }
+  .tilt { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .blurL { filter: blur(7px); }
+</style></head>
+<body class="fs">
+<div class="scene" id="scene"></div>
+<script src="base.js"></script>
+<script src="capcut-data.js"></script>
+<script>
+(() => {
+  const D = window.CAPCUT, MODE = str('mode', 'flat'), HEAD = num('head', MODE === 'flat' ? 1 : 0);
+  const T0 = num('t0', 0), X = num('x', 1.6), PPS = num('pps', MODE === '3d' ? 46 : 40);
+  const ROWS = [
+    { key: 'cap', name: 'Subtítulos', ic: 'T' },
+    { key: 'gfx', name: 'Gráficos', ic: '◆' },
+    { key: 'scr', name: 'Pantalla', ic: '▣' },
+    { key: 'tom', name: 'Tomas', ic: '▶' },
+    { key: 'voz', name: 'Voz', ic: 'ılı' },
+    ...(D.music ? [{ key: 'mus', name: 'Música', ic: '♪' }] : []),
+    { key: 'sfx', name: 'Efectos', ic: '♫' },
+  ];
+  const RH = MODE === '3d' ? 92 : (D.music ? 78 : 86);
+  const panelTop = HEAD ? 300 : 120, panelH = 66 + 52 + ROWS.length * RH + 24;
+  const tr = (n) => D.tracks.find((t) => t.name.startsWith(n)) || { clips: [] };
+  const fmtTC = (s) => { const f = Math.floor((s % 1) * 30); s = Math.floor(s);
+    return `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:${String(f).padStart(2, '0')}`; };
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  function panelHTML() {
+    let rows = '', labs = '';
+    ROWS.forEach((r, i) => {
+      labs += `<div class="lab" id="lab-${r.key}"><span class="ic">${r.ic}</span>${r.name}<span class="ok" id="ok-${r.key}">✓</span></div>`;
+      let inner = '';
+      const y = i * RH;
+      if (r.key === 'cap') D.captions.forEach((c) => { inner += `<div class="clip cap" style="left:${c.s * PPS}px;width:${Math.max(4, c.d * PPS - 3)}px"><span>${esc(c.l)}</span></div>`; });
+      if (r.key === 'gfx') tr('Gráficos').clips.forEach((c) => { inner += `<div class="clip gfx" style="left:${c.s * PPS}px;width:${c.d * PPS - 3}px"><span>${esc(c.l)}</span></div>`; });
+      if (r.key === 'scr') tr('Pantalla').clips.forEach((c) => { inner += `<div class="clip scr" style="left:${c.s * PPS}px;width:${c.d * PPS - 3}px"><span>${esc(c.l)}</span></div>`; });
+      if (r.key === 'tom') tr('Tomas').clips.forEach((c) => {
+        const lab = /^\d+$/.test(c.l) ? `${c.l}.mp4 ${fmtTC(c.d).slice(3)}` : 'fondo';
+        inner += `<div class="clip tom" style="left:${c.s * PPS}px;width:${c.d * PPS - 3}px"><span>${lab}</span>` +
+          (c.th ? `<div class="th" style="background-image:url('${c.th}')"></div>` : '') + '</div>'; });
+      if (r.key === 'voz' || r.key === 'mus') {
+        const env = r.key === 'voz' ? D.voice : D.music, cls = r.key === 'voz' ? 'wave' : 'mus';
+        let bars = ''; const step = 6 / PPS * 10;   // one bar every 6 px
+        for (let k = 0; k < env.length; k += Math.max(1, Math.round(step))) bars += `<i style="left:${(k / 10) * PPS}px;height:${4 + env[k] * (RH - 26)}px"></i>`;
+        inner += `<div class="${cls}" style="left:0;width:${D.dur * PPS}px">${bars}</div>`;
+      }
+      if (r.key === 'sfx') tr('SFX').clips.forEach((c) => { inner += `<div class="clip sfx" style="left:${c.s * PPS}px;width:${Math.max(70, c.d * PPS)}px"><span>${esc(c.l)}</span></div>`; });
+      rows += `<div class="row" id="row-${r.key}" style="top:${y + 5}px;width:${D.dur * PPS}px">${inner}</div>`;
+    });
+    let ticks = '';
+    for (let s = 0; s <= D.dur; s += 1) ticks += `<span class="tick${s % 5 === 0 ? ' big' : ''}" style="left:${s * PPS}px">${s % 5 === 0 ? `<span>${fmtTC(s).slice(3, 8)}</span>` : ''}</span>`;
+    return `<div class="panel" style="top:${panelTop}px;height:${panelH}px;--rh:${RH}px">
+      <div class="top"><img src="logos/app-capcut.png" onerror="this.style.visibility='hidden'"><b>${esc(D.name)}</b><span class="tc"><em class="tcnow">00:00:00:00</em> / ${fmtTC(D.dur)}</span></div>
+      <div class="body" style="height:${panelH - 66}px"><div class="labels">${labs}</div>
+      <div class="view"><div class="strip" style="position:absolute;left:0;top:0;bottom:0"><div class="ruler">${ticks}</div><div class="rows">${rows}</div></div>
+      <span class="ph"></span></div></div></div>`;
+  }
+  const scene = $('scene');
+  const head = HEAD ? `<div class="head2" id="h2"><div class="app" id="ha"><img src="logos/app-claude.png" onerror="this.style.visibility='hidden'"><b>Claude</b></div><div class="dots" id="dots"></div>
+    <div class="app" id="hb"><img src="logos/app-capcut.png" onerror="this.style.visibility='hidden'"><b>CapCut</b></div></div>` : '';
+  if (MODE === '3d') {
+    scene.innerHTML = `<div class="persp"><div class="tilt" id="tilt"><div class="blurL">${panelHTML()}</div>
+      <div id="sharp" style="position:absolute;inset:0;-webkit-mask-image:linear-gradient(100deg,transparent 18%,#000 38%,#000 62%,transparent 82%)">${panelHTML()}</div></div></div>`;
+  } else scene.innerHTML = head + panelHTML();
+  const strips = [...document.querySelectorAll('.strip')], phs = [...document.querySelectorAll('.ph')], tcs = [...document.querySelectorAll('.tcnow')];
+  const VIEW_W = 1700 - 250, PLAY_X = MODE === '3d' ? VIEW_W * 0.45 : VIEW_W * 0.32;
+  const c = [0, 1, 2, 3].map((i) => cue(i, -1));
+  const checks = ['tom', 'gfx', 'cap', 'sfx'];
+  tick((t) => {
+    const T = Math.min(D.dur, T0 + Math.max(0, t) * X);        // timeline time under the playhead
+    const off = Math.max(0, T * PPS - PLAY_X);
+    strips.forEach((s) => { s.style.transform = `translateX(${-off}px)`; });
+    phs.forEach((p) => { p.style.left = (T * PPS - off) + 'px'; });
+    tcs.forEach((e) => { e.textContent = fmtTC(T); });
+    checks.forEach((k, i) => {
+      const on = c[i] >= 0 && t >= c[i];
+      document.querySelectorAll('#ok-' + k).forEach((e) => { const u = easeOut(prog(t, c[i], 0.35)); e.style.opacity = on ? u : 0; e.style.transform = `scale(${0.6 + 0.4 * u})`; });
+      document.querySelectorAll('#row-' + k).forEach((e) => e.classList.toggle('hl', on && t < c[i] + 1.4));
+    });
+    if (MODE === '3d') {
+      const u = t * 0.06;
+      $('tilt').style.transform = `translate3d(${-60 - u * 40}px, 40px, 0) rotateX(34deg) rotateY(${-16 + u * 3}deg) rotateZ(-5deg) scale(1.45)`;
+    }
+  });
+  if (HEAD) {
+    anim($('ha'), 'popS .5s 0s both var(--ease)'); anim($('hb'), 'popS .5s .25s both var(--ease)');
+    tick((t) => { $('dots').style.backgroundPosition = `${t * 44}px 0`; $('dots').style.opacity = clamp01((t - 0.3) * 3); });
+  }
+  document.querySelectorAll('.panel').forEach((p) => anim(p, MODE === '3d' ? 'fadein .5s 0s both' : `slideU .6s ${HEAD ? 0.35 : 0}s both var(--ease)`));
+})();
+</script>
+</body></html>

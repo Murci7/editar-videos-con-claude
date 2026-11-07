@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .chip { position: absolute; left: 110px; top: 110px; display: flex; align-items: center; gap: 18px; padding: 12px 30px 12px 12px;
+    border-radius: 999px; background: color-mix(in srgb, var(--bg) 95%, transparent); border: 1px solid var(--line2); box-shadow: 0 20px 56px rgba(0,0,0,.45); }
+  .k { font-family: var(--font-mono); font-weight: 700; font-size: 24px; letter-spacing: 2.5px; color: var(--bg);
+    background: var(--sky); border-radius: 999px; padding: 10px 18px; white-space: nowrap; }
+  .sep { color: var(--sky); font-size: 40px; font-weight: 700; line-height: 1; margin: 0 -4px; }
+  .t { font-family: var(--font-display); font-weight: 600; font-size: 36px; letter-spacing: -.6px; white-space: nowrap; }
+  .dots { display: flex; gap: 6px; margin-left: 8px; }
+  .dots i { width: 26px; height: 7px; border-radius: 4px; background: var(--line2); }
+  .dots i.on { background: var(--sky); }
+  .dots i.now { background: var(--sky); box-shadow: 0 0 12px color-mix(in srgb, var(--sky) 80%, transparent); }
+</style></head>
+<body>
+<div class="chip" id="chip"><span class="k" id="k"></span><span class="sep">·</span><span class="t" id="t"></span><span class="dots" id="dots"></span></div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // n = step number · de = number of steps (default 4) · t = step title (optional) · d = clip duration
+  const total = Math.max(1, Math.round(num('de', 4))), n = Math.min(total, Math.max(1, Math.round(num('n', 1))));
+  const dur = num('d', 3.5), title = str('t', '');
+  $('k').textContent = `PASO ${n} DE ${total}`;
+  $('t').innerHTML = rich(title);
+  if (!title) { $('t').style.display = 'none'; document.querySelector('.sep').style.display = 'none'; }
+  for (let i = 1; i <= total; i++) {
+    const d = document.createElement('i');
+    if (i < n) d.className = 'on';
+    if (i === n) { d.className = 'now'; d.style.animation = 'growX .5s .35s both var(--ease)'; d.style.transformOrigin = '0 50%'; }
+    $('dots').appendChild(d);
+  }
+  anim($('chip'), `slideR .45s -.1s both var(--ease), fadeout .3s ${dur - 0.35}s forwards`);
+})();
+</script>
+</body></html>

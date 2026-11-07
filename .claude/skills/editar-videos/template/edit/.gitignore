@@ -1,0 +1,7 @@
+*.mp4
+*.mov
+*.wav
+!sfx/*.wav
+*.ass
+render/
+work/

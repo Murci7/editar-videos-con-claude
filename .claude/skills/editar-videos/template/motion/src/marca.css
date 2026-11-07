@@ -1,0 +1,24 @@
+/* ─── TU MARCA ──────────────────────────────────────────────────────────────────────────────────────────────────
+   Junto con marca.js (nombre, web) y logo.svg, es lo único que hay que tocar para poner tu marca.
+   Los colores se usan en todos los gráficos, en la miniatura y, desde edit/marca.py, en el fondo del título y del
+   cierre, en las grabaciones de pantalla y en el relleno del proyecto de CapCut. Usa siempre hex de 6 cifras.
+   Consejo: cambia solo --bg y los cuatro acentos (--sky, --blue, --b600, --deep); el resto son grises de apoyo.
+   ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=block');
+
+:root {
+  /* fondos y tarjetas (de más oscuro a más claro) */
+  --bg: #0E1116;  --bg2: #141820;  --card: #1A1F29;  --card2: #202634;
+  /* bordes */
+  --line: #2A3140;  --line2: #353D4F;
+  /* texto */
+  --text: #F4F5F7;  --muted: #AEB4C0;  --dim: #828A99;
+  /* acentos, del más claro al más oscuro (palabras destacadas, nodos, barras) */
+  --sky: #2DD4BF;  --blue: #14B8A6;  --b600: #0D9488;  --deep: #0F766E;
+  /* solo para avisos */
+  --orange: #F59E0B;
+  /* fuentes (si cambias de familia, cambia también el @import de arriba) */
+  --font-display: 'Geist', Arial, sans-serif;
+  --font-body: 'Inter', Arial, sans-serif;
+  --font-mono: 'Geist Mono', 'Courier New', monospace;
+}

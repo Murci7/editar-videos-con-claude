@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  .rail { position: absolute; left: 300px; width: 1320px; top: 482px; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--line2) 61%, var(--bg)); }
+  .seg { position: absolute; top: 482px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--sky), var(--blue));
+    transform-origin: 0 50%; box-shadow: 0 0 16px color-mix(in srgb, var(--sky) 50%, transparent); }
+  .st { position: absolute; top: 420px; width: 360px; margin-left: -180px; display: flex; flex-direction: column; align-items: center; }
+  .nd { width: 136px; height: 136px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--b600) 19%, var(--bg));
+    border: 3px solid color-mix(in srgb, var(--sky) 55%, transparent); font-family: var(--font-mono); font-weight: 700; font-size: 54px; color: var(--sky);
+    box-shadow: 0 18px 50px rgba(0,0,0,.5); margin-top: -34px; }
+  .st .t { margin-top: 30px; font-family: var(--font-display); font-weight: 700; font-size: 46px; letter-spacing: -1.4px; white-space: nowrap; }
+  .st .w { margin-top: 10px; font-family: var(--font-mono); font-size: 24px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .st.on .nd { background: linear-gradient(140deg, var(--blue), var(--deep)); color: #fff; border-color: var(--sky);
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--blue) 16%, transparent), 0 0 60px color-mix(in srgb, var(--sky) 50%, transparent); }
+  .st.on .w { color: var(--sky); }
+  .loop { position: absolute; left: 0; right: 0; top: 770px; display: flex; justify-content: center; }
+  .loop p { display: flex; align-items: center; gap: 18px; padding: 14px 32px 14px 14px; border-radius: 999px; border: 2px dashed color-mix(in srgb, var(--sky) 55%, transparent);
+    background: color-mix(in srgb, var(--bg2) 90%, transparent); font-family: var(--font-display); font-weight: 600; font-size: 36px; }
+  .loop i { width: 52px; height: 52px; border-radius: 50%; background: color-mix(in srgb, var(--sky) 16%, transparent); color: var(--sky); display: grid; place-items: center;
+    font-style: normal; font-weight: 800; font-size: 32px; }
+  @keyframes onN { from { transform: scale(1); } 60% { transform: scale(1.12); } to { transform: scale(1.06); } }
+  @keyframes dimSt { to { filter: brightness(.42) saturate(.5); } }
+  @keyframes q { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+</style></head>
+<body class="fs">
+<div class="head"><p class="eyebrow" id="eb"></p><h2 id="h2"></h2></div>
+<div class="rail"></div>
+<div id="steps"></div>
+<div class="loop" id="loop" style="display: none"><p><i id="qi">?</i><span id="qt"></span></p></div>
+<script src="base.js"></script>
+<script>
+(() => {
+  // pasos = "Título|subtítulo;Título|subtítulo;..." (2-5 steps) · eyebrow · h = heading (*word* = accent)
+  // active=N highlights step N (the others dim) · q = open-loop question shown under the flow (optional)
+  // cues: 0..n-1 reveal the nodes · n = the question (only with q)
+  const S = str('pasos', 'Entrada|Lo que llega;Proceso|Lo que se hace;Revisión|Lo que se comprueba;Resultado|Lo que sale')
+    .split(';').filter((x) => x.trim()).slice(0, 5).map((x) => x.split('|'));
+  const n = S.length, X = S.map((_, k) => (n > 1 ? 300 + k * 1320 / (n - 1) : 960));
+  const gap = n > 1 ? 1320 / (n - 1) : 720;
+  $('eb').textContent = str('eyebrow', 'Cómo funciona');
+  $('h2').innerHTML = rich(str('h', 'El flujo *entero*'));
+  const active = Math.round(num('active', 0));
+  const quick = active && !params.get('c');
+  const c = S.map((_, k) => cue(k, quick ? -0.1 + k * 0.08 : 0.3 + k * 1.3));
+  const steps = $('steps');
+  anim($('h2'), 'riseS .55s -.15s both var(--ease)');
+  S.forEach(([t, w], k) => {
+    const el = document.createElement('div');
+    el.className = 'st'; el.style.left = X[k] + 'px';
+    el.style.width = Math.min(360, gap - 16) + 'px'; el.style.marginLeft = -Math.min(360, gap - 16) / 2 + 'px';
+    el.innerHTML = `<div class="nd">${k + 1}</div><p class="t">${rich(t)}</p><p class="w">${rich(w || '')}</p>`;
+    if (n === 5) el.querySelector('.t').style.fontSize = '38px';
+    steps.appendChild(el);
+    anim(el, `slideU .55s ${c[k]}s both var(--ease)`);
+    if (k > 0) {
+      const sg = document.createElement('div');
+      sg.className = 'seg'; sg.style.left = X[k - 1] + 'px'; sg.style.width = (X[k] - X[k - 1]) + 'px';
+      steps.prepend(sg);
+      // with a highlighted step, the rail only lights up to it
+      if (!active || k < active) anim(sg, `growX .45s ${c[k] - 0.3}s both var(--ease)`);
+      else sg.style.opacity = 0;
+    }
+  });
+  if (active) {
+    const tOn = Math.max(...c) + (quick ? 0.35 : 0.5);
+    [...steps.querySelectorAll('.st')].forEach((el, k) => {
+      if (k + 1 === active) anim(el.querySelector('.nd'), `onN .5s ${tOn}s both var(--ease)`);
+      else el.style.animation += `, dimSt .35s ${tOn}s forwards`;
+    });
+    // the highlighted node switches on at tOn (before that it looks like the others)
+    const on = steps.querySelectorAll('.st')[active - 1];
+    if (on) tick((t) => on.classList.toggle('on', t >= tOn));
+  }
+  const q = str('q', '');
+  if (q) {
+    const cq = cue(n, (quick ? 1 : c[n - 1]) + 1.4);
+    $('qt').innerHTML = rich(q);
+    $('loop').style.display = 'flex';
+    anim($('loop'), `popS .45s ${cq}s both var(--ease)`);
+    anim($('qi'), `q .6s ${cq + 0.4}s both`);
+  }
+})();
+</script>
+</body></html>

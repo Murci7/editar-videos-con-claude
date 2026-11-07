@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Teleprompter</title>
+<style>
+  html,body{margin:0;height:100%;user-select:none;-webkit-user-select:none;cursor:default;background:#000;color:#fff;font-family:-apple-system,Helvetica,Arial,sans-serif;overflow:hidden}
+  #wrap{position:absolute;inset:0;overflow:hidden}
+  :root{--top:12px}
+  #col{width:min(900px,90vw);margin:0 auto;padding-top:var(--top);will-change:transform}
+  #title{font-size:18px;letter-spacing:2px;text-transform:uppercase;color:#38BDF8;margin-bottom:10px}
+  #text{font-size:var(--fs,40px);line-height:1.45;font-weight:600}
+  #text::after{content:"";display:block;height:80vh}
+  body.mirror #col{transform-origin:center;}
+  #hud{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;font-size:15px;color:#888;background:rgba(0,0,0,.8);
+       display:flex;justify-content:space-between;align-items:center;gap:12px}
+  #hud button{background:#1D4ED8;color:#fff;border:0;border-radius:6px;padding:4px 10px;margin-left:6px;font:600 14px -apple-system,Helvetica,Arial,sans-serif;cursor:pointer}
+  #guide{position:fixed;left:0;right:0;top:calc(var(--top) + 40px);height:2px;background:rgba(56,189,248,.35)}
+  body.hidehud #hud{display:none}
+</style></head>
+<body>
+<div id="wrap"><div id="col"><div id="title"></div><div id="text"></div></div></div>
+<div id="guide"></div>
+<div id="hud"><span id="info"></span><span>DOBLE CLIC empezar/parar · F pantalla completa · ↑↓ velocidad · → ← toma · R volver arriba · [ ] subir/bajar texto · + − letra · M espejo · H ocultar ayuda</span><span><button id="smaller">A−</button><button id="bigger">A+</button></span></div>
+<script>
+const TOMAS = __TOMAS__;
+let topOff = 12, i = 0, y = 0, speed = 60, playing = false, fs = 40, mirror = false, last = null;
+const col = document.getElementById('col'), title = document.getElementById('title'),
+      text = document.getElementById('text'), info = document.getElementById('info');
+try { const saved = parseInt(localStorage.getItem('tp-fs'), 10); if (saved) fs = saved; } catch (e) {}
+function setFs(n){ fs = Math.max(16, Math.min(110, n)); text.style.setProperty('--fs', fs + 'px');
+  try { localStorage.setItem('tp-fs', fs); } catch (e) {} }
+setFs(fs);
+document.getElementById('smaller').onclick = () => setFs(fs - 3);
+document.getElementById('bigger').onclick = () => setFs(fs + 3);
+function apply(){ col.style.transform = (mirror ? 'scaleX(-1) ' : '') + `translateY(${-y}px)`;
+  info.textContent = `Toma ${i+1}/${TOMAS.length} · velocidad ${speed} · ${playing ? '▶ leyendo' : '⏸ parado'}`; }
+function load(n){ i = Math.max(0, Math.min(TOMAS.length-1, n)); y = 0; playing = false;
+  title.textContent = TOMAS[i].t; text.textContent = TOMAS[i].x; apply(); }
+function tick(ts){ if (last !== null && playing) { y += speed * (ts - last) / 1000; apply(); } last = ts; requestAnimationFrame(tick); }
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') { playing = !playing; e.preventDefault(); }
+  else if (e.key === 'ArrowUp') speed = Math.min(300, speed + 10);
+  else if (e.key === 'ArrowDown') speed = Math.max(10, speed - 10);
+  else if (e.key === 'ArrowRight') load(i + 1);
+  else if (e.key === 'ArrowLeft') load(i - 1);
+  else if (e.key === 'r' || e.key === 'R') { y = 0; playing = false; }
+  else if (e.key === '+' || e.key === '=') setFs(fs + 3);
+  else if (e.key === '-' || e.key === '_') setFs(fs - 3);
+  else if (e.key === 'f' || e.key === 'F') { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+  else if (e.key === '[') { topOff = Math.max(0, topOff - 10); document.documentElement.style.setProperty("--top", topOff + "px"); }
+  else if (e.key === ']') { topOff += 10; document.documentElement.style.setProperty('--top', topOff + 'px'); }
+  else if (e.key === 'm' || e.key === 'M') mirror = !mirror;
+  else if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('hidehud');
+  apply();
+});
+document.addEventListener('dblclick', e => { if (e.target.closest('#hud')) return; e.preventDefault(); window.getSelection().removeAllRanges(); playing = !playing; apply(); });
+load(0); requestAnimationFrame(tick);
+</script></body></html>

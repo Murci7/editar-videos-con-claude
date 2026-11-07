@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  /* bottom edge at y ≈ 880: clear of the captions */
+  .lt { position: absolute; left: 110px; bottom: 200px; display: flex; align-items: stretch; gap: 0; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .bar { width: 10px; background: var(--sky); border-radius: 6px 0 0 6px; }
+  .box { background: color-mix(in srgb, var(--bg) 94%, transparent); border: 1px solid var(--line); border-left: none; border-radius: 0 16px 16px 0; padding: 22px 34px; display: flex; flex-direction: column; gap: 6px; }
+  .a { font-family: var(--font-display); font-weight: 700; font-size: 46px; letter-spacing: -1px; color: var(--text); white-space: nowrap; }
+  .b { font-size: 29px; color: var(--muted); white-space: nowrap; }
+  .b span { color: var(--sky); }
+</style></head>
+<body>
+<div class="lt" id="lt"><div class="bar"></div><div class="box"><p class="a" id="a"></p><p class="b" id="b"></p></div></div>
+<script src="marca.js"></script>
+<script src="base.js"></script>
+<script>
+(() => {
+  // kind=nombre (default: your name and role from marca.js) · a= / b= replace the two lines (*word* = accent), e.g.
+  // a CTA: a=Auditoría gratuita&b=Enlace en la *descripción* · d = clip duration
+  const dur = num('d', 5);
+  const T = { nombre: [rich(MARCA.nombre), rich(MARCA.rol)] }[str('kind', 'nombre')] || ['', ''];   // marca.js
+  $('a').innerHTML = params.get('a') ? rich(params.get('a')) : T[0];
+  $('b').innerHTML = params.get('b') ? rich(params.get('b')) : T[1];
+  anim($('lt'), `slideR .5s -.05s both var(--ease), outL .4s ${dur - 0.6}s forwards ease-in`);
+})();
+</script>
+</body></html>

@@ -1,0 +1,34 @@
+# Tus vídeos y todo lo que genera el montaje
+videos/
+takes/
+tomas/
+work/
+render/
+edits.json
+schedule.py
+music.wav
+
+# Medios (los efectos de sonido de la plantilla sí van en el repo)
+*.mp4
+*.mov
+*.mkv
+*.m4a
+*.mp3
+*.aiff
+*.wav
+!**/sfx/*.wav
+thumbnail/caras/
+thumbnail/ia/
+thumbnail/finales/
+
+# Estado local del generador de CapCut
+**/capcut/build/
+**/capcut/backups/
+**/capcut/generated_drafts.json
+
+# Entorno
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env

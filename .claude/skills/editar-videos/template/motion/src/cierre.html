@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css">
+<style>
+  body.opaque { background: radial-gradient(circle at 75% 50%, color-mix(in srgb, var(--blue) 23%, var(--bg)) 0%, var(--bg) 60%); }
+  .wrap { position: absolute; left: 128px; top: 250px; width: 820px; display: flex; flex-direction: column; gap: 30px; }
+  .logo img { width: 72px; height: 72px; } .logo span { font-size: 60px; letter-spacing: -2px; }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: 80px; letter-spacing: -2.5px; line-height: 1.02; }
+  p.s { font-size: 34px; color: var(--muted); line-height: 1.4; }
+  .gift { display: inline-flex; align-self: flex-start; align-items: center; gap: 16px; padding: 14px 30px 14px 14px; border-radius: 999px;
+    background: color-mix(in srgb, var(--sky) 12%, transparent); border: 2px solid var(--sky); font-family: var(--font-display); font-weight: 600; font-size: 36px; white-space: nowrap; }
+  .gift i { width: 52px; height: 52px; border-radius: 50%; background: var(--sky); display: grid; place-items: center; }
+  .gift i svg { width: 28px; height: 28px; }
+  p.u { font-family: var(--font-mono); font-size: 28px; letter-spacing: 2px; color: var(--sky); }
+  /* two empty 16:9 slots for the YouTube end-screen videos (the elements are placed on top of them in YouTube Studio) */
+  .slot { position: absolute; left: 1150px; width: 640px; height: 360px; border-radius: 18px; border: 2px solid color-mix(in srgb, var(--sky) 28%, transparent);
+    background: color-mix(in srgb, var(--bg2) 55%, transparent); box-shadow: inset 0 0 60px color-mix(in srgb, var(--sky) 6%, transparent); }
+  .slot.a { top: 150px; } .slot.b { top: 540px; }
+  .slot svg { position: absolute; left: 50%; top: 50%; width: 70px; height: 70px; margin: -35px 0 0 -35px; opacity: .35; }
+  .lbl { position: absolute; left: 1150px; top: 104px; font-family: var(--font-mono); font-size: 22px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+</style></head>
+<body>
+<div class="wrap">
+  <div class="logo" style="animation: fadein .6s -.2s both"><img id="logo" alt=""><span id="mk"></span></div>
+  <h2 id="h" style="animation: riseS .6s .1s both var(--ease)"></h2>
+  <p class="s" id="s" style="animation: fadein .6s .5s both"></p>
+  <p class="gift" id="gift" style="display: none; animation: popS .45s .9s both var(--ease)"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--bg)"><path d="M12 4v15M5 13l7 7 7-7"/></svg></i><span id="gt"></span></p>
+  <p class="u" id="web" style="animation: fadein .6s 1.2s both"></p>
+</div>
+<p class="lbl" id="lbl" style="animation: fadein .5s .3s both">Sigue viendo</p>
+<div class="slot a" style="animation: fadein .6s .2s both"><svg viewBox="0 0 24 24" style="fill: var(--sky)"><path d="M8 5v14l11-7z"/></svg></div>
+<div class="slot b" style="animation: fadein .6s .35s both"><svg viewBox="0 0 24 24" style="fill: var(--sky)"><path d="M8 5v14l11-7z"/></svg></div>
+<script src="marca.js"></script>
+<script src="base.js"></script>
+<script>
+(() => {
+  // End screen (full screen, END_DUR). h = headline · s = line under it (| = line break) · regalo = pill pointing down
+  // (e.g. «Plantilla gratis en la descripción»; hidden if empty) · web · slots=0 hides the two YouTube end-screen slots
+  $('h').innerHTML = rich(str('h', 'Gracias por verlo.'));
+  $('s').innerHTML = rich(str('s', '¿Qué te ha parecido?|Cuéntamelo en los comentarios.'));
+  $('web').textContent = str('web', MARCA.web);
+  $('logo').src = MARCA.logo; $('mk').textContent = MARCA.marca;
+  if (str('regalo', '')) { $('gt').innerHTML = rich(str('regalo', '')); $('gift').style.display = 'inline-flex'; }
+  if (params.get('slots') === '0') document.querySelectorAll('.slot, .lbl').forEach((el) => { el.style.display = 'none'; });
+})();
+</script>
+</body></html>
