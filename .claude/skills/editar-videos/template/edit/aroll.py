@@ -43,14 +43,18 @@ def build(take):
     for k, (fa, fb) in enumerate(frames(take)):
         a, b = fa / FPS, fb / FPS
         # video: frames fa..fb-1 (half-frame margins so float timestamps can't add or drop one); audio: exact span
-        v = f"[0:v]trim={max(0, (fa - 0.5) / FPS):.6f}:{(fb - 0.5) / FPS:.6f},setpts=PTS-STARTPTS"
+        # frame-exact: frames fa..fb-1 and samples fa*1600..fb*1600 (48 kHz). No fps filter: it could add a frame at
+        # the end of a segment, the concat would pad the audio to match, and the narration would drift against CapCut,
+        # whose clips are frame-exact (seen on a 5-min video: +21 frames, the voice ~0.7 s late by the end).
+        v = f"[0:v]trim=start_frame={fa}:end_frame={fb},setpts=PTS-STARTPTS"
         c = crop(take, k)
         if c:
             _, x, y, w, h = c
             v += f",crop={w}:{h}:{x}:{y},scale=1920:1080:flags=lanczos"
-        f.append(v + f",fps=30,setsar=1,format=yuv420p[v{k}]")
+        f.append(v + f",setsar=1,format=yuv420p[v{k}]")
         d = b - a
-        f.append(f"[0:a]atrim={a:.6f}:{b:.6f},asetpts=PTS-STARTPTS,afade=t=in:d=0.012,afade=t=out:st={max(0, d - 0.015):.3f}:d=0.015[a{k}]")
+        f.append(f"[0:a]aresample=48000,atrim=start_sample={fa * 1600}:end_sample={fb * 1600},asetpts=PTS-STARTPTS,"
+                 f"afade=t=in:d=0.012,afade=t=out:st={max(0, d - 0.015):.3f}:d=0.015[a{k}]")
         vouts.append(f"[v{k}]"); aouts.append(f"[a{k}]")
     f.append("".join(v + a for v, a in zip(vouts, aouts)) + f"concat=n={len(vouts)}:v=1:a=1[v][a]")
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(TAKES / f"{take}.mp4"),
